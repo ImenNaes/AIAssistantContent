@@ -1,0 +1,6 @@
+@AIAssistantContent_HostAddress = http://localhost:5286
+
+GET {{AIAssistantContent_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
