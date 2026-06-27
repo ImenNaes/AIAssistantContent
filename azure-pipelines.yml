@@ -14,7 +14,7 @@ variables:
   imageRepository: 'imennaesaiassistantcontent'
   containerRegistry: 'assistatairegistry.azurecr.io'
   containerRegistryName: 'assistatairegistry'
-  dockerfilePath: '$(Build.SourcesDirectory)/AIAssistantContent/Dockerfile'
+  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
   tag: '$(Build.BuildId)'
   ResourceGroup: 'rg-assistantai'
   devContainerApp: 'assistantai-dev'
