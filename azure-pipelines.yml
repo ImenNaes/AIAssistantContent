@@ -13,6 +13,7 @@ variables:
   dockerRegistryServiceConnection: '40aca9bb-864d-4789-9128-dadd469c6035'
   imageRepository: 'imennaesaiassistantcontent'
   containerRegistry: 'assistatairegistry.azurecr.io'
+  containerRegistryName: 'assistatairegistry'
   dockerfilePath: '$(Build.SourcesDirectory)/AIAssistantContent/Dockerfile'
   tag: '$(Build.BuildId)'
   ResourceGroup: 'rg-assistantai'
@@ -37,7 +38,7 @@ stages:
         command: buildAndPush
         repository: $(imageRepository)
         dockerfile: $(dockerfilePath)
-        containerRegistry: $(dockerRegistryServiceConnection)
+        containerRegistry: $(containerRegistryName)
         tags: |
           $(tag)
 
