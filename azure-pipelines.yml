@@ -23,6 +23,8 @@ variables:
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
 
+ # Variable pour déclencher le stage Prod
+  DeployToProd: 'false'
 stages:
 - stage: Build
   displayName: Build and push stage
@@ -41,7 +43,7 @@ stages:
         command: buildAndPush
         repository: $(imageRepository)
         dockerfile: $(dockerfilePath)
-        containerRegistry: 'assistatairegistry'
+        containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
 
