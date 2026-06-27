@@ -4,7 +4,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0.101 AS restore
 WORKDIR /src
 
-COPY AIContentAssistant.csproj .
+COPY AIAssistantContent.csproj .
 RUN dotnet restore
 
 # ============================
