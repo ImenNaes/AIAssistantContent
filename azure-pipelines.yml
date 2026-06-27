@@ -41,7 +41,7 @@ stages:
         command: buildAndPush
         repository: $(imageRepository)
         dockerfile: $(dockerfilePath)
-        containerRegistry: $(containerRegistryName)
+        containerRegistry: 'assistatairegistry'
         tags: |
           $(tag)
 
