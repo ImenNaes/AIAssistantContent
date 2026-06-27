@@ -18,7 +18,7 @@ RUN dotnet publish -c Release -o /app/publish
 
 # ============================
 # 3. Runtime stage
-# ============================
+# ============================	
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 
