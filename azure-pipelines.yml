@@ -1,0 +1,94 @@
+# Docker
+# Build and push an image to Azure Container Registry
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+- master
+
+resources:
+- repo: self
+
+variables:
+  # Container registry service connection established during pipeline creation
+  dockerRegistryServiceConnection: '40aca9bb-864d-4789-9128-dadd469c6035'
+  imageRepository: 'imennaesaiassistantcontent'
+  containerRegistry: 'assistatairegistry.azurecr.io'
+  containerRegistryName: 'assistatairegistry'
+  dockerfilePath: '$(Build.SourcesDirectory)/AIAssistantContent/Dockerfile'
+  tag: '$(Build.BuildId)'
+  ResourceGroup: 'rg-assistantai'
+  devContainerApp: 'assistantai-dev'
+  prodContainerApp: 'assistantai-prod'
+
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
+
+stages:
+- stage: Build
+  displayName: Build and push stage
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: Docker@2
+      displayName: Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
+        containerRegistry: $(containerRegistryName)
+        tags: |
+          $(tag)
+
+# =========================
+# 2. Deploy Dev (CD auto)
+# =========================
+- stage: Deploy_Dev
+  displayName: Deploy to Dev
+  dependsOn: Build
+  jobs:
+  - job: DeployDev
+    displayName: Deploy to Azure Container Apps (Dev)
+    steps:
+    - task: AzureCLI@2
+      displayName: Deploy to Dev
+      inputs:
+        azureSubscription: 'azure-connection-service'
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az extension add --name containerapp --yes
+
+          az containerapp update \
+            --name $(devContainerApp) \
+            --resource-group $(ResourceGroup) \
+            --image $(containerRegistry)/$(imageRepository):$(Build.BuildId) \
+            --set-env-vars ASPNETCORE_ENVIRONMENT=Development
+
+# =========================
+# 3. Deploy Prod (CD manuel)
+# =========================
+- stage: Deploy_Prod
+  displayName: Deploy to Prod
+  dependsOn: Deploy_Dev
+  condition: and(succeeded(), eq(variables['DeployToProd'], 'true'))
+  jobs:
+  - job: DeployProd
+    displayName: Deploy to Azure Container Apps (Prod)
+    steps:
+    - task: AzureCLI@2
+      displayName: Deploy to Prod
+      inputs:
+        azureSubscription: 'azure-connection-service'
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az extension add --name containerapp --yes
+
+          az containerapp update \
+            --name $(prodContainerApp) \
+            --resource-group $(ResourceGroup) \
+            --image $(containerRegistry)/$(imageRepository):$(Build.BuildId) \
+            --set-env-vars ASPNETCORE_ENVIRONMENT=Production
