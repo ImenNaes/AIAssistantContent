@@ -75,28 +75,24 @@ stages:
 - stage: Deploy_Prod
   displayName: Deploy to Prod
   dependsOn: Deploy_Dev
-  condition: and(succeeded(), eq(variables['DeployToProd'], 'true'))
+  condition: succeeded()
   jobs:
-  - deployment: DeployProd
+  - job: DeployProd
     displayName: Deploy to Azure Container Apps (Prod)
-    environment:
-      name: 'prod'
-      resourceType: None
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: AzureCLI@2
-            displayName: Deploy to Prod
-            inputs:
-              azureSubscription: 'azure-connection-service'
-              scriptType: bash
-              scriptLocation: inlineScript
-              inlineScript: |
-                az extension add --name containerapp --yes
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: AzureCLI@2
+      displayName: Deploy to Prod
+      inputs:
+        azureSubscription: 'azure-connection-service'
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az extension add --name containerapp --yes
 
-                az containerapp update \
-                  --name $(prodContainerApp) \
-                  --resource-group $(ResourceGroup) \
-                  --image $(containerRegistry)/$(imageRepository):$(Build.BuildId) \
-                  --set-env-vars ASPNETCORE_ENVIRONMENT=Production
+          az containerapp update \
+            --name $(prodContainerApp) \
+            --resource-group $(ResourceGroup) \
+            --image $(containerRegistry)/$(imageRepository):$(Build.BuildId) \
+            --set-env-vars ASPNETCORE_ENVIRONMENT=Production
