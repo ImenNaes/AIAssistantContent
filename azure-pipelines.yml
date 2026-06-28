@@ -75,13 +75,13 @@ stages:
 - stage: Deploy_Prod
   displayName: Deploy to Prod
   dependsOn: Deploy_Dev
-  condition: succeeded()
+  condition: and(succeeded(), eq(variables['DeployToProd'], 'true'))
   jobs:
   - deployment: DeployProd
     displayName: Deploy to Azure Container Apps (Prod)
-    environment: 
+    environment:
       name: 'prod'
-      resourceType: VirtualMachine
+      resourceType: None
     strategy:
       runOnce:
         deploy:
@@ -100,4 +100,3 @@ stages:
                   --resource-group $(ResourceGroup) \
                   --image $(containerRegistry)/$(imageRepository):$(Build.BuildId) \
                   --set-env-vars ASPNETCORE_ENVIRONMENT=Production
-
