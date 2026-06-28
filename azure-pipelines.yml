@@ -24,7 +24,7 @@ variables:
   vmImageName: 'ubuntu-latest'
 
  # Variable pour déclencher le stage Prod
-  DeployToProd: 'false'
+  DeployToProd: 'true'
 stages:
 - stage: Build
   displayName: Build and push stage
