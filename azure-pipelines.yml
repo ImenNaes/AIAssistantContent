@@ -75,11 +75,13 @@ stages:
 - stage: Deploy_Prod
   displayName: Deploy to Prod
   dependsOn: Deploy_Dev
-  condition: and(succeeded(), eq(variables['DeployToProd'], 'true'))
+  condition: succeeded()
   jobs:
   - deployment: DeployProd
     displayName: Deploy to Azure Container Apps (Prod)
-    environment: 'prod'
+    environment: 
+      name: 'prod'
+      resourceType: VirtualMachine
     strategy:
       runOnce:
         deploy:
