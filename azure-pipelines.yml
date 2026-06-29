@@ -14,7 +14,7 @@ variables:
   imageRepository: 'imennaesaiassistantcontent'
   containerRegistry: 'assistatairegistry.azurecr.io'
   containerRegistryName: 'assistatairegistry'
-  dockerfilePath: '$(Build.SourcesDirectory)/AIAssistantContent/Dockerfile'
+  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
   tag: '$(Build.BuildId)'
   ResourceGroup: 'rg-assistantai'
   devContainerApp: 'assistantai-dev'
@@ -23,6 +23,8 @@ variables:
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
 
+ # Variable pour déclencher le stage Prod
+  DeployToProd: 'true'
 stages:
 - stage: Build
   displayName: Build and push stage
@@ -41,7 +43,7 @@ stages:
         command: buildAndPush
         repository: $(imageRepository)
         dockerfile: $(dockerfilePath)
-        containerRegistry: 'assistatairegistry'
+        containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
 
@@ -70,16 +72,15 @@ stages:
             --image $(containerRegistry)/$(imageRepository):$(Build.BuildId) \
             --set-env-vars ASPNETCORE_ENVIRONMENT=Development
 
-# =========================
-# 3. Deploy Prod (CD manuel)
-# =========================
 - stage: Deploy_Prod
   displayName: Deploy to Prod
   dependsOn: Deploy_Dev
-  condition: and(succeeded(), eq(variables['DeployToProd'], 'true'))
+  condition: succeeded()
   jobs:
   - job: DeployProd
     displayName: Deploy to Azure Container Apps (Prod)
+    pool:
+      vmImage: $(vmImageName)
     steps:
     - task: AzureCLI@2
       displayName: Deploy to Prod
